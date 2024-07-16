@@ -1,33 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import TaskInput from './components/TaskInput';
+import TaskList from './components/TaskList';
+// eslint-disable-next-line no-unused-vars
+import { useEffect, useState } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+
+
+  const [tasks, setTasks] = useState(localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : []);
+
+
+  const addTask = (task) => {
+    // id, title, done
+    setTasks([...tasks, {id: Date.now(), title: task, done: false}]);
+
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+
+  }
+
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+  }, [tasks])
+
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter((task) => task.id !== id));
+  }
+
+  const toggleTask = (id) => {
+    setTasks(tasks.map((task) => task.id === id ? {...task, done: !task.done} : task))
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="flex flex-col min-h-screen justify-center items-center">
+      <h2 className='text-3xl font-bold'>📋 To Do List</h2>
+      <div className='my-4'>
+      <TaskInput onAddTask={addTask}/>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <TaskList tasks={tasks} onDeleteTask={deleteTask} onToggleTask={toggleTask}/>
+    </div>
     </>
   )
 }
